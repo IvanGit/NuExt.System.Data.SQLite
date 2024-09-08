@@ -1,0 +1,100 @@
+[
+  {
+    "Title": "The Godfather",
+    "Description": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+    "DateReleased": "1972.03.24",
+    "Starring": [
+      "Marlon Brando",
+      "Al Pacino",
+      "James Caan",
+      "Richard Castellano",
+      "Robert Duvall",
+      "Sterling Hayden",
+      "John Marley",
+      "Richard Conte",
+      "Diane Keaton"
+    ],
+    "Directed by": [
+      "Francis Ford Coppola"
+    ],
+    "Screenplay by": [
+      "Mario Puzo",
+      "Francis Ford Coppola"
+    ]
+  },
+  {
+    "Title": "The Terminator",
+    "Description": "The Terminator, a cyborg assassin from the future, attempts to find and kill Sarah Connor, a waitress who is destined to give birth to a man who will save humankind from extinction.",
+    "DateReleased": "1984.10.26",
+    "Starring": [
+      "Arnold Schwarzenegger",
+      "Michael Biehn",
+      "Linda Hamilton",
+      "Paul Winfield"
+    ],
+    "Directed by": [
+      "James Cameron"
+    ],
+    "Screenplay by": [
+      "James Cameron",
+      "Gale Anne Hurd"
+    ]
+  },
+  {
+    "Title": "Terminator 2: Judgment Day",
+    "Description": "A cyborg, identical to the one who failed to kill Sarah Connor, must now protect her ten year old son John from an even more advanced and powerful cyborg.",
+    "DateReleased": "1991.07.01",
+    "Starring": [
+      "Arnold Schwarzenegger",
+      "Linda Hamilton",
+      "Robert Patrick"
+    ],
+    "Directed by": [
+      "James Cameron"
+    ],
+    "Screenplay by": [
+      "James Cameron",
+      "William Wisher"
+    ]
+  },
+  {
+    "Title": "Inception",
+    "DateReleased": "2010.07.16",
+    "Starring": [
+      "Leonardo DiCaprio",
+      "Ken Watanabe",
+      "Joseph Gordon-Levitt",
+      "Marion Cotillard",
+      "Elliot Page",
+      "Tom Hardy",
+      "Cillian Murphy",
+      "Tom Berenger",
+      "Michael Caine"
+    ],
+    "Directed by": [
+      "Christopher Nolan"
+    ],
+    "Screenplay by": [
+      "Christopher Nolan"
+    ]
+  },
+  {
+    "Title": "Interstellar",
+    "DateReleased": "2014.10.26",
+    "Starring": [
+      "Matthew McConaughey",
+      "Anne Hathaway",
+      "Jessica Chastain",
+      "Bill Irwin",
+      "Ellen Burstyn",
+      "Michael Caine"
+    ],
+    "Directed by": [
+      "Christopher Nolan"
+    ],
+    "Screenplay by": [
+      "Jonathan Nolan",
+      "Christopher Nolan"
+    ]
+  }
+]
