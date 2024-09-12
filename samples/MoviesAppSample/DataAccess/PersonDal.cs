@@ -138,10 +138,10 @@ namespace MoviesAppSample.DataAccess
                         }
                         processedRows.Add(row);
                     }
-                    var deletedRows = table.Rows.Cast<DataRow>().Except(processedRows);
-                    foreach (var deletedRow in deletedRows)
+                    var rowsToDelete = table.Rows.Cast<DataRow>().Except(processedRows);
+                    foreach (var row in rowsToDelete)
                     {
-                        deletedRow.Delete();
+                        row.Delete();
                     }
                     int num = 0;
                     if (table.HasChanges())
