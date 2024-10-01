@@ -16,7 +16,7 @@ namespace MoviesAppSample.DataAccess
         {
         }
 
-        #region Properites
+        #region Properties
 
         protected override string[] Columns => s_columns;
         protected override string TableName => "Movies";

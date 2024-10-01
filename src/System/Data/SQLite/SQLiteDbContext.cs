@@ -11,6 +11,7 @@ namespace System.Data.SQLite
     {
         private readonly SQLiteDbTransaction _transaction;
         private readonly Lifetime _lifetime = new();
+        private readonly bool _checkAcquired;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLiteDbContext"/> class with the specified SQLite database connection.
@@ -18,12 +19,28 @@ namespace System.Data.SQLite
         /// <param name="connection">The SQLite database connection.</param>
         /// <exception cref="ArgumentNullException">Thrown when the provided connection is null.</exception>
         public SQLiteDbContext(SQLiteDbConnection connection)
+            : this(connection, true) // Default behavior is to check acquisition state
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SQLiteDbContext"/> class with the specified SQLite database connection
+        /// and a flag indicating whether to check if the connection is acquired.
+        /// </summary>
+        /// <param name="connection">The SQLite database connection.</param>
+        /// <param name="checkAcquired">Whether to check if the connection is acquired to prevent "database is locked" exception.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the provided connection is null.</exception>
+        public SQLiteDbContext(SQLiteDbConnection connection, bool checkAcquired)
         {
             try
             {
                 _lifetime.Add(() => GC.SuppressFinalize(this));
                 Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-                CheckAcquired();
+                _checkAcquired = checkAcquired;
+                if (checkAcquired)
+                {
+                    CheckAcquired();
+                }
                 Debug.Assert(!connection.InTransaction, $"{nameof(connection)} in transaction.");
                 Throw.InvalidOperationExceptionIf(connection.InTransaction, $"{nameof(connection)} in transaction.");
                 Connection.Open(out var originalState);
@@ -70,7 +87,11 @@ namespace System.Data.SQLite
         /// </summary>
         public void Commit()
         {
-            CheckAcquired();
+            CheckDisposed();
+            if (_checkAcquired)
+            {
+                CheckAcquired();
+            }
             _transaction.Commit();
         }
 
@@ -79,7 +100,10 @@ namespace System.Data.SQLite
         /// </summary>
         protected override void OnDispose()
         {
-            CheckAcquired();
+            if (_checkAcquired)
+            {
+                CheckAcquired();
+            }
             _lifetime.Dispose();
             base.OnDispose();
         }
@@ -89,7 +113,11 @@ namespace System.Data.SQLite
         /// </summary>
         public void Rollback()
         {
-            CheckAcquired();
+            CheckDisposed();
+            if (_checkAcquired)
+            {
+                CheckAcquired();
+            }
             _transaction.Rollback();
         }
 

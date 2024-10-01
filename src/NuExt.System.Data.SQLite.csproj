@@ -14,7 +14,7 @@ System.Data.SQLite.SQLiteDbConnection
 System.Data.SQLite.SQLiteDbContext
 System.Data.SQLite.SQLiteDbConverter
 System.Data.SQLite.SQLiteDbTransaction</Description>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <RootNamespace />
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
