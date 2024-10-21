@@ -6,10 +6,11 @@
 
         internal class AsyncLockCounter : Disposable
         {
-            public readonly ReentrantAsyncLock Mutex = new();
-            public volatile int ReferenceCount;
+            internal readonly ReentrantAsyncLock Mutex = new();
+            internal volatile int ReferenceCount;
+            internal string? DataSource;
 #if DEBUG
-            public bool IsExpired => ReferenceCount <= 0;
+            internal bool IsExpired => ReferenceCount <= 0;
 #endif
             protected override void OnDispose()
             {
@@ -43,28 +44,28 @@
         /// <summary>
         /// Gets an object that can be used to synchronize access to the database.
         /// </summary>
-        internal AsyncLockCounter GetSyncObj(string connectionString)
+        internal AsyncLockCounter GetSyncObj(string dataSource)
         {
             AsyncLockCounter? syncObject;
             lock (_sharedLocks)
             {
-                if (!_sharedLocks.TryGetValue(connectionString, out syncObject))
+                if (!_sharedLocks.TryGetValue(dataSource, out syncObject))
                 {
-                    _sharedLocks.Add(connectionString, syncObject = new AsyncLockCounter());
+                    _sharedLocks.Add(dataSource, syncObject = new AsyncLockCounter() { DataSource = dataSource });
                 }
                 Interlocked.Increment(ref syncObject.ReferenceCount);
             }
             return syncObject;
         }
 
-        internal bool TryRelease(string connectionString)
+        internal bool TryRelease(string dataSource)
         {
             lock (_sharedLocks)
             {
-                if (_sharedLocks.TryGetValue(connectionString, out var syncObject) && 
+                if (_sharedLocks.TryGetValue(dataSource, out var syncObject) && 
                     Interlocked.Decrement(ref syncObject.ReferenceCount) <= 0)
                 {
-                    _sharedLocks.Remove(connectionString);
+                    _sharedLocks.Remove(dataSource);
                     syncObject.Dispose();
                     return true;
                 }

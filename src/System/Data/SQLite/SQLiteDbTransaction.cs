@@ -14,9 +14,8 @@ namespace System.Data.SQLite
         private const int ROLLBACK = 2;
         #endregion
 
-        private SQLiteDbConnection? _connection;
-        private SQLiteTransaction? _transaction;
-        private Action? _onDispose;
+        private readonly SQLiteDbConnection _connection;
+        private readonly SQLiteTransaction _transaction;
 
         private int _state = NONE;
 
@@ -29,13 +28,12 @@ namespace System.Data.SQLite
         /// </summary>
         /// <param name="connection">The SQLite database connection.</param>
         /// <param name="transaction">The underlying SQLite transaction.</param>
-        /// <param name="onDispose">An action to perform upon disposal.</param>
         /// <exception cref="ArgumentNullException">Thrown when the provided connection or transaction is null.</exception>
-        internal SQLiteDbTransaction(SQLiteDbConnection connection, SQLiteTransaction transaction, Action? onDispose)
+        internal SQLiteDbTransaction(SQLiteDbConnection connection, SQLiteTransaction transaction)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
             _transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
-            _onDispose = onDispose;
+            Interlocked.Increment(ref _connection.TransactionCount);
             Debug.Assert(connection.DefaultTimeout == 30);
         }
 
@@ -44,12 +42,12 @@ namespace System.Data.SQLite
         /// <summary>
         /// Gets the database connection associated with this transaction.
         /// </summary>
-        public IDbConnection Connection => _transaction!.Connection;
+        public IDbConnection Connection => _transaction.Connection;
 
         /// <summary>
         /// Gets the isolation level of this transaction.
         /// </summary>
-        public IsolationLevel IsolationLevel => _transaction!.IsolationLevel;
+        public IsolationLevel IsolationLevel => _transaction.IsolationLevel;
 
         #endregion
 
@@ -79,12 +77,9 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
             var originalState = Interlocked.CompareExchange(ref _state, COMMIT, NONE);
-            if (originalState != NONE)
-            {
-                Debug.Assert(false, $"Trying commit with state: {originalState}");
-                return;
-            }
-            _transaction!.Commit();
+            Debug.Assert(originalState == NONE, $"Trying commit with state: {originalState}");
+            Throw.InvalidOperationExceptionIf(originalState != NONE, $"Trying commit with state: {originalState}");
+            _transaction.Commit();
         }
 
         /// <summary>
@@ -92,19 +87,20 @@ namespace System.Data.SQLite
         /// </summary>
         protected override void OnDispose()
         {
-            DisposeAndNull(ref _transaction);
-            if (_onDispose != null)
+            try
             {
-                _onDispose();
-                _onDispose = null;
+                _transaction.Dispose();
             }
+            finally
+            {
+                Interlocked.Decrement(ref _connection.TransactionCount);
 #if DEBUG
-            var elapsed = _watch.Elapsed;
-            var timeout = _connection?.DefaultTimeout;
-            Debug.Assert(elapsed.TotalSeconds < timeout, $"Transaction elapsed: {elapsed}, Expected: {timeout} sec");
+                var elapsed = _watch.Elapsed;
+                var timeout = _connection.DefaultTimeout;
+                Debug.Assert(elapsed.TotalSeconds < timeout, $"Transaction elapsed: {elapsed}, Expected: {timeout} sec");
 #endif
-            _connection = null;
-            base.OnDispose();
+                base.OnDispose();
+            }
         }
 
         /// <summary>
@@ -114,15 +110,11 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
             var originalState = Interlocked.CompareExchange(ref _state, ROLLBACK, NONE);
-            if (originalState != NONE)
-            {
-                Debug.Assert(false, $"Trying rollback with state: {originalState}");
-                return;
-            }
-            _transaction!.Rollback();
+            Debug.Assert(originalState == NONE, $"Trying rollback with state: {originalState}");
+            Throw.InvalidOperationExceptionIf(originalState != NONE, $"Trying rollback with state: {originalState}");
+            _transaction.Rollback();
         }
 
         #endregion
-
     }
 }

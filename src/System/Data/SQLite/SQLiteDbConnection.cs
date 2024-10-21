@@ -14,7 +14,7 @@ namespace System.Data.SQLite
     {
         private readonly SQLiteConnection _conn;
         private SQLiteDbConnectionFactory.AsyncLockCounter _syncRoot;
-        private volatile int _inTransaction;
+        internal volatile int TransactionCount;
 
         /// <summary>
         /// Initializes the connection with the specified connection string.
@@ -37,12 +37,12 @@ namespace System.Data.SQLite
 #else
             Throw.IfNullOrEmpty(connectionString);
 #endif
-            _ = new SQLiteConnectionStringBuilder(connectionString);//throws if connection string is invalid
+            var csb = new SQLiteConnectionStringBuilder(connectionString);//throws if connection string is invalid
             _conn = new SQLiteConnection(connectionString);
             UseSharedLock = useSharedLock;
             if (useSharedLock)
             {
-                _syncRoot = SQLiteDbConnectionFactory.Instance.GetSyncObj(connectionString);
+                _syncRoot = SQLiteDbConnectionFactory.Instance.GetSyncObj(csb.DataSource);
             }
             else
             {
@@ -66,7 +66,7 @@ namespace System.Data.SQLite
             set => _conn.DefaultTimeout = value;
         }
 
-        public bool InTransaction => _inTransaction > 0;
+        public bool InTransaction => TransactionCount > 0;
 
         /// <summary>
         /// Determines whether the current connection holds the database lock.
@@ -125,7 +125,6 @@ namespace System.Data.SQLite
         protected override void OnDispose()
         {
             Close();
-            var connectionString = _conn.ConnectionString;
             _conn.Dispose();
 
             var syncRoot = Interlocked.Exchange(ref _syncRoot!, null);
@@ -133,7 +132,7 @@ namespace System.Data.SQLite
             {
                 if (UseSharedLock)
                 {
-                    if (SQLiteDbConnectionFactory.Instance.TryRelease(connectionString))
+                    if (SQLiteDbConnectionFactory.Instance.TryRelease(syncRoot.DataSource!))
                     {
                         Debug.Assert(syncRoot.IsDisposed);
                     }

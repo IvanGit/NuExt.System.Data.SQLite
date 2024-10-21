@@ -10,16 +10,15 @@ namespace System.Data.SQLite
         public SQLiteDbTransaction BeginTransaction()
         {
             CheckDisposed();
-            Debug.Assert(_inTransaction == 0);
-            Interlocked.Increment(ref _inTransaction);
+            Debug.Assert(TransactionCount == 0, "Transaction count should be zero before starting a new transaction.");
+            Throw.InvalidOperationExceptionIf(InTransaction, "SQLite does not support nested transactions");
             try
             {
-                return new SQLiteDbTransaction(this, _conn.BeginTransaction(), () => Interlocked.Decrement(ref _inTransaction));
+                return new SQLiteDbTransaction(this, _conn.BeginTransaction());
             }
             catch (Exception ex)
             {
                 Debug.Assert(_assertsDisabled, ex.GetType() + ": " + ex.Message);
-                Interlocked.Decrement(ref _inTransaction);
                 throw;
             }
         }
@@ -27,16 +26,15 @@ namespace System.Data.SQLite
         public SQLiteDbTransaction BeginTransaction(IsolationLevel isolationLevel)
         {
             CheckDisposed();
-            Debug.Assert(_inTransaction == 0);
-            Interlocked.Increment(ref _inTransaction);
+            Debug.Assert(TransactionCount == 0, "Transaction count should be zero before starting a new transaction.");
+            Throw.InvalidOperationExceptionIf(InTransaction, "SQLite does not support nested transactions");
             try
             {
-                return new SQLiteDbTransaction(this, _conn.BeginTransaction(isolationLevel), () => Interlocked.Decrement(ref _inTransaction));
+                return new SQLiteDbTransaction(this, _conn.BeginTransaction(isolationLevel));
             }
             catch (Exception ex)
             {
                 Debug.Assert(_assertsDisabled, ex.GetType() + ": " + ex.Message);
-                Interlocked.Decrement(ref _inTransaction);
                 throw;
             }
         }
