@@ -29,6 +29,20 @@ In scenarios where multiple write operations occur simultaneously, especially in
 - **`System.Data.SQLite.SQLiteDbConverter`**: Base class for applying updates to the SQLite database schema.
 - **`System.Data.SQLite.SQLiteDbTransaction`**: Provides methods for managing SQLite transactions.
 
+### Installation
+
+You can install `NuExt.System.Data.SQLite` via [NuGet](https://www.nuget.org/):
+
+```sh
+dotnet add package NuExt.System.Data.SQLite
+```
+
+Or through the Visual Studio package manager:
+
+1. Go to `Tools -> NuGet Package Manager -> Manage NuGet Packages for Solution...`.
+2. Search for `NuExt.System.Data.SQLite`.
+3. Click "Install".
+
 ### Usage Examples
 
 For examples of how to use these classes, see the [samples](samples). These samples provide practical guidance on implementing the library's features in real-world scenarios.
