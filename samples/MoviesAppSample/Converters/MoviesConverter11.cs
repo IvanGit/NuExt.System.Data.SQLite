@@ -6,15 +6,15 @@ namespace MoviesAppSample.Converters
     {
         public override Version Version { get; } = new("1.1");
 
-        protected override bool PerformUpdate(SQLiteDbConnection connection)
+        protected override bool PerformUpdate(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
-            CreateTableMovieCasts(connection);
-            CreateTableMovieDirectors(connection);
-            CreateTableMovieWriters(connection);
+            CreateTableMovieCasts(connection, cancellationToken);
+            CreateTableMovieDirectors(connection, cancellationToken);
+            CreateTableMovieWriters(connection, cancellationToken);
             return true;
         }
 
-        private static void CreateTableMovieCasts(SQLiteDbConnection connection)
+        private static void CreateTableMovieCasts(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             connection.ExecuteNonQuery("""
 CREATE TABLE IF NOT EXISTS MovieCasts (
@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS MovieCasts (
     FOREIGN KEY (PersonId) REFERENCES Persons(Id),
     PRIMARY KEY (MovieId, PersonId)
 );
-""");
+""", cancellationToken: cancellationToken);
         }
 
-        private static void CreateTableMovieDirectors(SQLiteDbConnection connection)
+        private static void CreateTableMovieDirectors(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             connection.ExecuteNonQuery("""
 CREATE TABLE IF NOT EXISTS MovieDirectors (
@@ -37,10 +37,10 @@ CREATE TABLE IF NOT EXISTS MovieDirectors (
     FOREIGN KEY (PersonId) REFERENCES Persons(Id),
     PRIMARY KEY (MovieId, PersonId)
 );
-""");
+""", cancellationToken : cancellationToken);
         }
 
-        private static void CreateTableMovieWriters(SQLiteDbConnection connection)
+        private static void CreateTableMovieWriters(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             connection.ExecuteNonQuery("""
 CREATE TABLE IF NOT EXISTS MovieWriters (
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS MovieWriters (
     FOREIGN KEY (PersonId) REFERENCES Persons(Id),
     PRIMARY KEY (MovieId, PersonId)
 );
-""");
+""", cancellationToken: cancellationToken);
         }
     }
 }

@@ -86,7 +86,7 @@ namespace System.Data.SQLite
                 }, cancellationToken);
         }
 
-        public static ICollection<string> GetTableColumns(this SQLiteDbConnection connection, string tableName)
+        public static ICollection<string> GetTableColumns(this SQLiteDbConnection connection, string tableName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
@@ -102,17 +102,18 @@ namespace System.Data.SQLite
 #endif
             var columns = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
+            connection.ExecuteReader($"PRAGMA table_info('{tableName}')", Read, CommandBehavior.Default, cancellationToken);
+            return columns;
+
             void Read(SQLiteDataReader reader)
             {
                 index ??= reader.GetOrdinal("name");
                 string name = reader.GetString(index.Value);
                 columns.Add(name);
             }
-            connection.ExecuteReader($"PRAGMA table_info('{tableName}')", Read);
-            return columns;
         }
 
-        public static DataTable GetTableSchema(this SQLiteDbConnection connection, string tableName)
+        public static DataTable GetTableSchema(this SQLiteDbConnection connection, string tableName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
@@ -126,12 +127,12 @@ namespace System.Data.SQLite
 #else
             Throw.IfNullOrEmpty(tableName);
 #endif
-            var schema = connection.Select($"SELECT * FROM \"{tableName}\" WHERE 0=1");
+            var schema = connection.Select($"SELECT * FROM \"{tableName}\" WHERE 0=1", cancellationToken);
             schema.TableName = tableName;
             return schema;
         }
 
-        public static ICollection<string> GetAllTables(this SQLiteDbConnection connection)
+        public static ICollection<string> GetAllTables(this SQLiteDbConnection connection, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
 #if NET6_0_OR_GREATER
@@ -141,17 +142,18 @@ namespace System.Data.SQLite
 #endif
             var tables = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
+            connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='table'", Read, CommandBehavior.Default, cancellationToken);
+            return tables;
+
             void Read(SQLiteDataReader reader)
             {
                 index ??= reader.GetOrdinal("name");
                 string name = reader.GetString(index.Value);
                 tables.Add(name);
             }
-            connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='table'", Read);
-            return tables;
         }
 
-        public static ICollection<string> GetAllViews(this SQLiteDbConnection connection)
+        public static ICollection<string> GetAllViews(this SQLiteDbConnection connection, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
 #if NET6_0_OR_GREATER
@@ -161,17 +163,18 @@ namespace System.Data.SQLite
 #endif
             var tables = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
+            connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='view'", Read, CommandBehavior.Default, cancellationToken);
+            return tables;
+
             void Read(SQLiteDataReader reader)
             {
                 index ??= reader.GetOrdinal("name");
                 string name = reader.GetString(index.Value);
                 tables.Add(name);
             }
-            connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='view'", Read);
-            return tables;
         }
 
-        public static ICollection<string> GetTableIndexes(this SQLiteDbConnection connection, string tableName)
+        public static ICollection<string> GetTableIndexes(this SQLiteDbConnection connection, string tableName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
@@ -193,11 +196,11 @@ namespace System.Data.SQLite
                 string name = reader.GetString(index.Value);
                 indexes.Add(name);
             }
-            connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='index' AND tbl_name=@tbl_name", Read, CommandBehavior.Default, DbType.String.CreateInputParam("@tbl_name", tableName));
+            connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='index' AND tbl_name=@tbl_name", Read, CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@tbl_name", tableName));
             return indexes;
         }
 
-        public static bool IsTableEmpty(this SQLiteDbConnection connection, string tableName)
+        public static bool IsTableEmpty(this SQLiteDbConnection connection, string tableName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
@@ -211,11 +214,11 @@ namespace System.Data.SQLite
 #else
             Throw.IfNullOrEmpty(tableName);
 #endif
-            var res = connection.ExecuteScalar($"SELECT 1 FROM \"{tableName}\" LIMIT 1");
+            var res = connection.ExecuteScalar($"SELECT 1 FROM \"{tableName}\" LIMIT 1", CommandBehavior.Default, cancellationToken);
             return res is null;
         }
 
-        public static bool IsTableExist(this SQLiteDbConnection connection, string tableName)
+        public static bool IsTableExist(this SQLiteDbConnection connection, string tableName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
@@ -230,11 +233,11 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(tableName);
 #endif
             var res = connection.ExecuteScalar("SELECT 1 FROM sqlite_master WHERE name=@name and type='table' LIMIT 1",
-                DbType.String.CreateInputParam("@name", tableName));
+                CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@name", tableName));
             return res is not null;
         }
 
-        public static bool IsTableIndexExist(this SQLiteDbConnection connection, string tableName, string indexName)
+        public static bool IsTableIndexExist(this SQLiteDbConnection connection, string tableName, string indexName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
@@ -253,12 +256,13 @@ namespace System.Data.SQLite
 #endif
             var res = connection.ExecuteScalar(
                 "SELECT 1 FROM sqlite_master WHERE tbl_name=@tbl_name AND name=@name and type='index' LIMIT 1",
+                CommandBehavior.Default, cancellationToken,
                 DbType.String.CreateInputParam("@tbl_name", tableName),
                 DbType.String.CreateInputParam("@name", indexName));
             return res is not null;
         }
 
-        public static bool IsTriggerExist(this SQLiteDbConnection connection, string triggerName)
+        public static bool IsTriggerExist(this SQLiteDbConnection connection, string triggerName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(triggerName), $"{nameof(triggerName)} is null or empty");
@@ -273,11 +277,11 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(triggerName);
 #endif
             var res = connection.ExecuteScalar("SELECT 1 FROM sqlite_master WHERE name=@name and type='trigger' LIMIT 1",
-                DbType.String.CreateInputParam("@name", triggerName));
+                CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@name", triggerName));
             return res is not null;
         }
 
-        public static bool IsViewExist(this SQLiteDbConnection connection, string viewName)
+        public static bool IsViewExist(this SQLiteDbConnection connection, string viewName, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(viewName), $"{nameof(viewName)} is null or empty");
@@ -292,7 +296,7 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(viewName);
 #endif
             var res = connection.ExecuteScalar("SELECT 1 FROM sqlite_master WHERE name=@name and type='view' LIMIT 1",
-                DbType.String.CreateInputParam("@name", viewName));
+                CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@name", viewName));
             return res is not null;
         }
     }

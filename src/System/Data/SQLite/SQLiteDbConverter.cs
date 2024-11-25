@@ -39,7 +39,7 @@ END;
         /// <summary>
         /// Array containing the column names used in version-related operations.
         /// </summary>
-        private static readonly string[] s_dbValueArray = { "db_value" };
+        private static readonly string[] s_dbValueArray = ["db_value"];
 
         /// <summary>
         /// Gets the name of the key used to identify the version information in the database.
@@ -55,11 +55,13 @@ END;
         /// Retrieves the current version of the database schema from the specified database connection.
         /// </summary>
         /// <param name="connection">The database connection to use for retrieving the version.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
         /// <returns>The current version of the database schema.</returns>
-        public override Version GetDbVersion(SQLiteDbConnection connection)
+        public override Version GetDbVersion(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             var obj = connection.ExecuteScalar($"SELECT db_value FROM {VersionTableName} WHERE db_key = @db_key LIMIT 1",
-                DbType.String.CreateInputParam("@db_key", VersionKeyName));
+                cancellationToken: cancellationToken,
+                parameters: DbType.String.CreateInputParam("@db_key", VersionKeyName));
             Debug.Assert(obj != null);
             try
             {
@@ -78,20 +80,22 @@ END;
         /// to perform the necessary changes to bring the database to the target version.
         /// </summary>
         /// <param name="connection">The database connection to use for performing the updates.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
         /// <returns><c>true</c> if the update operations were successful; otherwise, <c>false</c>.</returns>
-        protected abstract bool PerformUpdate(SQLiteDbConnection connection);
+        protected abstract bool PerformUpdate(SQLiteDbConnection connection, CancellationToken cancellationToken);
 
         /// <summary>
         /// Determines whether the database requires an update to match the version specified by this converter.
         /// </summary>
         /// <param name="connection">The database connection to check.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
         /// <returns><c>true</c> if the database requires an update; otherwise, <c>false</c>.</returns>
-        public override bool RequiresUpdate(SQLiteDbConnection connection)
+        public override bool RequiresUpdate(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             using var _ = connection.SuspendAsserts();
             try
             {
-                return base.RequiresUpdate(connection);
+                return base.RequiresUpdate(connection, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -106,14 +110,16 @@ END;
         /// </summary>
         /// <param name="connection">The database connection to use for adding version information.</param>
         /// <param name="dbVersion">The version value to insert into the version table.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
         /// <returns><c>true</c> if the version information was successfully added; otherwise, <c>false</c>.</returns>
-        protected bool TryAddDbInfo(SQLiteDbConnection connection, string dbVersion)
+        protected bool TryAddDbInfo(SQLiteDbConnection connection, string dbVersion, CancellationToken cancellationToken)
         {
-            connection.ExecuteNonQuery(CreateVersionTable);
-            connection.ExecuteNonQuery(TriggerAfterUpdateDbValue);
+            connection.ExecuteNonQuery(CreateVersionTable, cancellationToken: cancellationToken);
+            connection.ExecuteNonQuery(TriggerAfterUpdateDbValue, cancellationToken: cancellationToken);
             int affected = connection.ExecuteNonQuery($"INSERT OR IGNORE INTO {VersionTableName} (db_key, db_value) VALUES (@db_key, @db_value)",
-                DbType.String.CreateInputParam("@db_key", VersionKeyName),
-                DbType.String.CreateInputParam("@db_value", dbVersion));
+                cancellationToken: cancellationToken,
+                parameters: [ DbType.String.CreateInputParam("@db_key", VersionKeyName),
+                DbType.String.CreateInputParam("@db_value", dbVersion) ]);
             return affected == 1;
         }
 
@@ -121,21 +127,22 @@ END;
         /// Updates the database schema to the current version defined by this converter.
         /// </summary>
         /// <param name="connection">The database connection to use for performing the update.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
         /// <returns><c>true</c> if the update operations were successful; otherwise, <c>false</c>.</returns>
-        public sealed override bool Update(SQLiteDbConnection connection)
+        public sealed override bool Update(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             Debug.Assert(connection.InTransaction);
-            if (PerformUpdate(connection))
+            if (!PerformUpdate(connection, cancellationToken))
             {
-                connection.ExecuteNonQuery(TriggerAfterUpdateDbValue);
-                using var updateCommand = connection.CreateCommandUpdate($"{VersionTableName}", s_dbValueArray, "WHERE db_key=@db_key",
-                    DbType.String.CreateInputParam("@db_value", Version.ToString()),
-                    DbType.String.CreateInputParam("@db_key", VersionKeyName));
-                int rowsUpdated = connection.ExecuteNonQuery(updateCommand);
-                Debug.Assert(rowsUpdated == 1);
-                return true;
+                return false;
             }
-            return false;
+            connection.ExecuteNonQuery(TriggerAfterUpdateDbValue, cancellationToken: cancellationToken);
+            using var updateCommand = connection.CreateCommandUpdate($"{VersionTableName}", s_dbValueArray, "WHERE db_key=@db_key",
+                DbType.String.CreateInputParam("@db_value", Version.ToString()),
+                DbType.String.CreateInputParam("@db_key", VersionKeyName));
+            int rowsUpdated = connection.ExecuteNonQuery(updateCommand, cancellationToken: cancellationToken);
+            Debug.Assert(rowsUpdated == 1);
+            return true;
         }
     }
 }

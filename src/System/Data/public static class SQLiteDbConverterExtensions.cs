@@ -37,7 +37,7 @@ namespace System.Data
 
             connection.ExecuteInTransaction(t =>
             {
-                converters.Initialize(connection);
+                DbConverterExtensions.Initialize(converters, connection, cancellationToken);
                 t.Commit();
             }, cancellationToken);
         }

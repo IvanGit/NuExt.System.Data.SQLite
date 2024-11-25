@@ -37,7 +37,7 @@ namespace MoviesAppSample.DataAccess
 
                     using var command = ctx.Connection.CreateCommandDelete(TableName, "WHERE Id=@Id",
                     DbType.Int64.CreateInputParam("@Id", id));
-                int affected = ctx.Connection.ExecuteNonQuery(command, cancellationToken);
+                int affected = ctx.Connection.ExecuteNonQuery(command, cancellationToken: cancellationToken);
                 return affected == 1;
             }, cancellationToken);
         }
@@ -61,7 +61,7 @@ namespace MoviesAppSample.DataAccess
                 {
                     bool result = await personDal.DeleteMoviePersonsAsync(ctx, id, cancellationToken);
                     command.Parameters["@Id"].Value = id;
-                    affected += ctx.Connection.ExecuteNonQuery(command, cancellationToken);
+                    affected += ctx.Connection.ExecuteNonQuery(command, cancellationToken: cancellationToken);
                 }
                 return affected > 0;
             }, cancellationToken);
@@ -76,7 +76,7 @@ namespace MoviesAppSample.DataAccess
                 using var command = ctx.Connection.CreateCommandSelect(TableName, Columns, "WHERE Id=@Id LIMIT 1",
                     DbType.Int64.CreateInputParam("@Id", id));
                 MovieDto? dto = null;
-                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken);
+                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken: cancellationToken);
                 Debug.Assert(1 == count);
                 return dto;
 
@@ -94,7 +94,7 @@ namespace MoviesAppSample.DataAccess
             {
                 using var command = ctx.Connection.CreateCommandSelect(TableName, Columns, "ORDER BY DateReleased");
                 var list = new List<MovieDto>();
-                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken);
+                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken: cancellationToken);
                 Debug.Assert(list.Count == count);
                 return list;
 
@@ -124,9 +124,10 @@ namespace MoviesAppSample.DataAccess
                 if (dto.Id <= 0)
                 {
                     command = ctx.Connection.CreateCommandInsert(TableName, s_updateColumns,
+                        parameters: [
                         DbType.String.CreateInputParam("@Title", dto.Title),
                         DbType.String.CreateInputParam("@Description", dto.Description),
-                        DbType.DateTime.CreateInputParam("@DateReleased", dto.DateReleased));
+                        DbType.DateTime.CreateInputParam("@DateReleased", dto.DateReleased) ]);
                 }
                 else
                 {
@@ -138,7 +139,7 @@ namespace MoviesAppSample.DataAccess
                 }
                 using (command)
                 {
-                    int affected = ctx.Connection.ExecuteNonQuery(command, cancellationToken);
+                    int affected = ctx.Connection.ExecuteNonQuery(command, cancellationToken: cancellationToken);
                     Debug.Assert(affected == 1);
                 }
                 if (dto.Id <= 0)

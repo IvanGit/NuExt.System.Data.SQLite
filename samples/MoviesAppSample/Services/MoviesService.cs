@@ -33,7 +33,7 @@ namespace MoviesAppSample.Services
             return await movieDal.DeleteMoviesAsync(null, moviesToDelete.Select(m => m.Id), cancellationToken);
         }
 
-        public async ValueTask<List<Movie>> GetAllMoviesAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<List<Movie>> GetAllMoviesAsync(CancellationToken cancellationToken)
         {
             using var connection = CreateConnection();
 
@@ -42,7 +42,7 @@ namespace MoviesAppSample.Services
                 using var dbContext = new SQLiteDbContext(connection);
                 try
                 {
-                    s_moviesConverters.Initialize(dbContext);
+                    s_moviesConverters.Initialize(dbContext, cancellationToken);
                     using var movieDal = new MovieDal(CreateConnection);
                     using var personDal = new PersonDal(CreateConnection);
                     var movieDtos = await movieDal.LoadMoviesAsync(dbContext, cancellationToken);
@@ -84,13 +84,13 @@ namespace MoviesAppSample.Services
             return csb.ConnectionString;
         }
 
-        public ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+        public ValueTask InitializeAsync(CancellationToken cancellationToken)
         {
             s_moviesConverters.Initialize(CreateConnection, cancellationToken);
             return default;
         }
 
-        public async ValueTask<bool> SaveMovieAsync(Movie movie, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> SaveMovieAsync(Movie movie, CancellationToken cancellationToken)
         {
             using var connection = CreateConnection();
 
@@ -99,7 +99,7 @@ namespace MoviesAppSample.Services
                 using var dbContext = new SQLiteDbContext(connection);
                 try
                 {
-                    s_moviesConverters.Initialize(dbContext);
+                    s_moviesConverters.Initialize(dbContext, cancellationToken);
                     using var movieDal = new MovieDal(CreateConnection);
                     using var personDal = new PersonDal(CreateConnection);
 

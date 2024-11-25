@@ -36,7 +36,7 @@ namespace MoviesAppSample.DataAccess
                 {
                     using var command = ctx.Connection.CreateCommandDelete(tableName, "WHERE MovieId=@MovieId",
                         DbType.Int64.CreateInputParam("@MovieId", movieId));
-                    affected += ctx.Connection.ExecuteNonQuery(command, cancellationToken);
+                    affected += ctx.Connection.ExecuteNonQuery(command, cancellationToken: cancellationToken);
                 }
                 return affected > 0;
             }, cancellationToken);
@@ -79,7 +79,7 @@ namespace MoviesAppSample.DataAccess
                         reader.GetString(1)
                     ));
                 }
-                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken);
+                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken: cancellationToken);
                 Debug.Assert(list.Count == count);
                 return list;
             }, cancellationToken);
@@ -171,11 +171,11 @@ namespace MoviesAppSample.DataAccess
                 {
                     var dto = dtos[i];
                     commandInsert.Parameters["@Name"].Value = dto.Name;
-                    var id = ctx.Connection.ExecuteScalar(commandInsert, cancellationToken);
+                    var id = ctx.Connection.ExecuteScalar(commandInsert, cancellationToken: cancellationToken);
                     if (id is null)//person alreasy exists
                     {
                         commandSelect.Parameters["@Name"].Value = dto.Name;
-                        id = ctx.Connection.ExecuteScalar(commandSelect, cancellationToken);
+                        id = ctx.Connection.ExecuteScalar(commandSelect, cancellationToken: cancellationToken);
                         Debug.Assert(id is not null);
                     }
                     Debug.Assert(id is long);
