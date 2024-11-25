@@ -4,21 +4,17 @@ using System.Diagnostics;
 
 namespace MoviesAppSample.DataAccess
 {
-    internal sealed class PersonDal : SQLiteDalBase
+    internal sealed class PersonDal(Func<SQLiteDbConnection> createConnection) : SQLiteDalBase(createConnection)
     {
-        private static readonly string[] s_columns = { "Id", "Name" };
+        private static readonly string[] s_columns = ["Id", "Name"];
 
-        private static readonly string[] s_idColumns = { "Id" };
+        private static readonly string[] s_idColumns = ["Id"];
 
-        private static readonly string[] s_updateColumns = { "Name" };
+        private static readonly string[] s_updateColumns = ["Name"];
 
-        private static readonly string[] s_relationshipColumns = { "MovieId", "PersonId" };
+        private static readonly string[] s_relationshipColumns = ["MovieId", "PersonId"];
 
-        private static readonly string[] s_relationshipTables = { "MovieCasts", "MovieDirectors", "MovieWriters" };
-
-        public PersonDal(Func<SQLiteDbConnection> createConnection) : base(createConnection)
-        {
-        }
+        private static readonly string[] s_relationshipTables = ["MovieCasts", "MovieDirectors", "MovieWriters"];
 
         #region Properties
 
@@ -40,7 +36,7 @@ namespace MoviesAppSample.DataAccess
                 {
                     using var command = ctx.Connection.CreateCommandDelete(tableName, "WHERE MovieId=@MovieId",
                         DbType.Int64.CreateInputParam("@MovieId", movieId));
-                    affected += ctx.Connection.ExecuteNonQuery(command);
+                    affected += ctx.Connection.ExecuteNonQuery(command, cancellationToken);
                 }
                 return affected > 0;
             }, cancellationToken);
@@ -78,13 +74,12 @@ namespace MoviesAppSample.DataAccess
                 var list = new List<PersonDto>();
                 void Read(SQLiteDataReader reader)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
                     list.Add(new PersonDto(
                         reader.GetInt64(0),
                         reader.GetString(1)
                     ));
                 }
-                int count = ctx.Connection.ExecuteReader(command, Read);
+                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken);
                 Debug.Assert(list.Count == count);
                 return list;
             }, cancellationToken);
@@ -119,7 +114,7 @@ namespace MoviesAppSample.DataAccess
             cancellationToken.ThrowIfCancellationRequested();
             return TryExecuteInDbContextAsync(context, ctx =>
             {
-                var (adapter, table) = ctx.Connection.SelectForUpdate(tableName, s_relationshipColumns, "WHERE MovieId=@MovieId", true,
+                var (adapter, table) = ctx.Connection.SelectForUpdate(tableName, s_relationshipColumns, "WHERE MovieId=@MovieId", true, cancellationToken,
                     DbType.Int64.CreateInputParam("@MovieId", movieId));
                 //table.PrimaryKey = new[] { table.Columns["MovieId"], table.Columns["PersonId"] };
                 using (adapter)
@@ -146,7 +141,7 @@ namespace MoviesAppSample.DataAccess
                     int num = 0;
                     if (table.HasChanges())
                     {
-                        num = ctx.Connection.Update(adapter, table);
+                        num = ctx.Connection.Update(adapter, table, cancellationToken);
                     }
                     table.ClearAndDispose();
                     return num > 0;
@@ -176,11 +171,11 @@ namespace MoviesAppSample.DataAccess
                 {
                     var dto = dtos[i];
                     commandInsert.Parameters["@Name"].Value = dto.Name;
-                    var id = ctx.Connection.ExecuteScalar(commandInsert);
+                    var id = ctx.Connection.ExecuteScalar(commandInsert, cancellationToken);
                     if (id is null)//person alreasy exists
                     {
                         commandSelect.Parameters["@Name"].Value = dto.Name;
-                        id = ctx.Connection.ExecuteScalar(commandSelect);
+                        id = ctx.Connection.ExecuteScalar(commandSelect, cancellationToken);
                         Debug.Assert(id is not null);
                     }
                     Debug.Assert(id is long);

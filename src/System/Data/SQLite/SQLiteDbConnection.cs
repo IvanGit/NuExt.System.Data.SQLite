@@ -147,7 +147,7 @@ namespace System.Data.SQLite
 
         public void Open()
         {
-            Debug.Assert(!IsOpen, $"Connection is open");
+            Debug.Assert(!IsOpen, $"Connection is open:{Environment.NewLine}{ConnectionString}");
             _conn.Open();
         }
 

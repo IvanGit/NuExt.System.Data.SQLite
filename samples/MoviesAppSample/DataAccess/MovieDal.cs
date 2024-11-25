@@ -2,23 +2,19 @@
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Diagnostics;
-using System.Text;
 
 namespace MoviesAppSample.DataAccess
 {
-    internal sealed class MovieDal : SQLiteDalBase
+    internal sealed class MovieDal(Func<SQLiteDbConnection> createConnection) : SQLiteDalBase(createConnection)
     {
-        private static readonly string[] s_columns = { "Id", "Title", "Description", "DateReleased" };
+        private static readonly string[] s_columns = ["Id", "Title", "Description", "DateReleased"];
 
-        private static readonly string[] s_updateColumns = { "Title", "Description", "DateReleased" };
-
-        public MovieDal(Func<SQLiteDbConnection> createConnection) : base(createConnection)
-        {
-        }
+        private static readonly string[] s_updateColumns = ["Title", "Description", "DateReleased"];
 
         #region Properties
 
         protected override string[] Columns => s_columns;
+
         protected override string TableName => "Movies";
 
         #endregion
@@ -41,7 +37,7 @@ namespace MoviesAppSample.DataAccess
 
                     using var command = ctx.Connection.CreateCommandDelete(TableName, "WHERE Id=@Id",
                     DbType.Int64.CreateInputParam("@Id", id));
-                int affected = ctx.Connection.ExecuteNonQuery(command);
+                int affected = ctx.Connection.ExecuteNonQuery(command, cancellationToken);
                 return affected == 1;
             }, cancellationToken);
         }
@@ -65,7 +61,7 @@ namespace MoviesAppSample.DataAccess
                 {
                     bool result = await personDal.DeleteMoviePersonsAsync(ctx, id, cancellationToken);
                     command.Parameters["@Id"].Value = id;
-                    affected += ctx.Connection.ExecuteNonQuery(command);
+                    affected += ctx.Connection.ExecuteNonQuery(command, cancellationToken);
                 }
                 return affected > 0;
             }, cancellationToken);
@@ -80,14 +76,14 @@ namespace MoviesAppSample.DataAccess
                 using var command = ctx.Connection.CreateCommandSelect(TableName, Columns, "WHERE Id=@Id LIMIT 1",
                     DbType.Int64.CreateInputParam("@Id", id));
                 MovieDto? dto = null;
-                void Read(SQLiteDataReader reader)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    dto = ReadMovie(reader);
-                }
-                int count = ctx.Connection.ExecuteReader(command, Read);
+                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken);
                 Debug.Assert(1 == count);
                 return dto;
+
+                void Read(SQLiteDataReader reader)
+                {
+                    dto = ReadMovie(reader);
+                }
             }, cancellationToken);
         }
 
@@ -98,14 +94,14 @@ namespace MoviesAppSample.DataAccess
             {
                 using var command = ctx.Connection.CreateCommandSelect(TableName, Columns, "ORDER BY DateReleased");
                 var list = new List<MovieDto>();
-                void Read(SQLiteDataReader reader)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    list.Add(ReadMovie(reader));
-                }
-                int count = ctx.Connection.ExecuteReader(command, Read);
+                int count = ctx.Connection.ExecuteReader(command, Read, cancellationToken);
                 Debug.Assert(list.Count == count);
                 return list;
+
+                void Read(SQLiteDataReader reader)
+                {
+                    list.Add(ReadMovie(reader));
+                }
             }, cancellationToken);
         }
 
@@ -142,7 +138,7 @@ namespace MoviesAppSample.DataAccess
                 }
                 using (command)
                 {
-                    int affected = ctx.Connection.ExecuteNonQuery(command);
+                    int affected = ctx.Connection.ExecuteNonQuery(command, cancellationToken);
                     Debug.Assert(affected == 1);
                 }
                 if (dto.Id <= 0)

@@ -6,40 +6,35 @@ using System.Data.SQLite;
 
 namespace MoviesAppSample.Services
 {
-    internal class MoviesService
+    internal class MoviesService(string dataBasePath)
     {
-        private static readonly SQLiteDbConverter[] s_moviesConverters = { new MoviesConverter10(), new MoviesConverter11() };
-
-        public MoviesService(string dataBasePath)
-        {
-            DataBasePath = dataBasePath ?? throw new ArgumentNullException(nameof(dataBasePath));
-        }
+        private static readonly SQLiteDbConverter[] s_moviesConverters = [new MoviesConverter10(), new MoviesConverter11()
+        ];
 
         #region Properties
 
-        public string DataBasePath { get; }
+        public string DataBasePath { get; } = dataBasePath ?? throw new ArgumentNullException(nameof(dataBasePath));
 
         #endregion
 
         #region Methods
 
+        private SQLiteDbConnection CreateConnection() => new(GetMoviesConnectionString());
+
         public async ValueTask<bool> DeleteMovieAsync(long movieId, CancellationToken cancellationToken)
         {
-            SQLiteDbConnection CreateConnection() => new(GetMoviesConnectionString());
             using var movieDal = new MovieDal(CreateConnection);
             return await movieDal.DeleteMovieAsync(null, movieId, cancellationToken);
         }
 
         public async ValueTask<bool> DeleteMoviesAsync(List<Movie> moviesToDelete, CancellationToken cancellationToken)
         {
-            SQLiteDbConnection CreateConnection() => new(GetMoviesConnectionString());
             using var movieDal = new MovieDal(CreateConnection);
             return await movieDal.DeleteMoviesAsync(null, moviesToDelete.Select(m => m.Id), cancellationToken);
         }
 
         public async ValueTask<List<Movie>> GetAllMoviesAsync(CancellationToken cancellationToken = default)
         {
-            SQLiteDbConnection CreateConnection() => new(GetMoviesConnectionString());
             using var connection = CreateConnection();
 
             return await connection.AcquireLockAsync(async () =>
@@ -91,14 +86,12 @@ namespace MoviesAppSample.Services
 
         public ValueTask InitializeAsync(CancellationToken cancellationToken = default)
         {
-            SQLiteDbConnection CreateConnection() => new(GetMoviesConnectionString());
             s_moviesConverters.Initialize(CreateConnection, cancellationToken);
             return default;
         }
 
         public async ValueTask<bool> SaveMovieAsync(Movie movie, CancellationToken cancellationToken = default)
         {
-            SQLiteDbConnection CreateConnection() => new(GetMoviesConnectionString());
             using var connection = CreateConnection();
 
             return await connection.AcquireLockAsync(async () =>

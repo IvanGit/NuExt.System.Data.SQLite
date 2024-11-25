@@ -8,11 +8,15 @@ namespace System.Data.SQLite
     {
         #region Methods
 
+        #region CreateCommand
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteCommand CreateCommand()
         {
             return _conn.CreateCommand();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteCommand CreateCommand(string sql, params SQLiteParameter[] parameters)
         {
             SQLiteCommand command = CreateCommand();
@@ -25,6 +29,7 @@ namespace System.Data.SQLite
             return command;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteCommand CreateCommandInsert(string tableName, IEnumerable<string> fields, params SQLiteParameter[] parameters)
         {
             return CreateCommandInsert(tableName, fields, null, parameters);
@@ -66,6 +71,7 @@ namespace System.Data.SQLite
             return CreateCommand(builder.ToString(), parameters);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteCommand CreateCommandInsertOrIgnore(string tableName, IEnumerable<string> fields, params SQLiteParameter[] parameters)
         {
             return CreateCommandInsertOrIgnore(tableName, fields, null, parameters);
@@ -107,6 +113,7 @@ namespace System.Data.SQLite
             return CreateCommand(builder.ToString(), parameters);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteCommand CreateCommandInsertOrReplace(string tableName, IEnumerable<string> fields, params SQLiteParameter[] parameters)
         {
             return CreateCommandInsertOrReplace(tableName, fields, null, parameters);
@@ -217,13 +224,59 @@ namespace System.Data.SQLite
             return CreateCommand(builder.ToString(), parameters);
         }
 
+        #endregion
+
+        #region ExecuteNonQuery
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteNonQuery(string sql, params SQLiteParameter[] parameters)
+        {
+            return ExecuteNonQuery(sql, CommandBehavior.Default, default, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteNonQuery(string sql, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
+        {
+            return ExecuteNonQuery(sql, CommandBehavior.Default, cancellationToken, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteNonQuery(string sql, CommandBehavior behavior, params SQLiteParameter[] parameters)
+        {
+            return ExecuteNonQuery(sql, behavior, default, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteNonQuery(string sql, CommandBehavior behavior, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
+        {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(sql);
+#else
+            Throw.IfNullOrEmpty(sql);
+#endif
+            using var command = CreateCommand(sql, parameters);
+            return ExecuteNonQuery(command, behavior, cancellationToken);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ExecuteNonQuery(SQLiteCommand command)
         {
-            return ExecuteNonQuery(command, default);
+            return ExecuteNonQuery(command, CommandBehavior.Default, default);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ExecuteNonQuery(SQLiteCommand command, CancellationToken cancellationToken)
+        {
+            return ExecuteNonQuery(command, CommandBehavior.Default, cancellationToken);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteNonQuery(SQLiteCommand command, CommandBehavior behavior)
+        {
+            return ExecuteNonQuery(command, behavior, default);
+        }
+
+        public int ExecuteNonQuery(SQLiteCommand command, CommandBehavior behavior, CancellationToken cancellationToken)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
@@ -235,7 +288,7 @@ namespace System.Data.SQLite
                     QuietOpen(out var open);
                     try
                     {
-                        return command.ExecuteNonQuery();
+                        return command.ExecuteNonQuery(behavior);
                     }
                     catch (Exception ex)
                     {
@@ -249,15 +302,30 @@ namespace System.Data.SQLite
                 }, cancellationToken);
         }
 
+        #endregion
+
+        #region ExecuteReader
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteNonQuery(string sql, params SQLiteParameter[] parameters)
+        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, params SQLiteParameter[] parameters)
         {
-            return ExecuteNonQuery(sql, default, parameters);
+            return ExecuteReader(sql, read, CommandBehavior.Default, default, parameters);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteNonQuery(string sql, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
+        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
+        {
+            return ExecuteReader(sql, read, CommandBehavior.Default, cancellationToken, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CommandBehavior behavior, params SQLiteParameter[] parameters)
+        {
+            return ExecuteReader(sql, read, behavior, default, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CommandBehavior behavior, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
         {
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(sql);
@@ -265,28 +333,28 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(sql);
 #endif
             using var command = CreateCommand(sql, parameters);
-            return ExecuteNonQuery(command);
+            return ExecuteReader(command, read, behavior, cancellationToken);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read)//1a=>2a
+        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read)
         {
-            return ExecuteReader(command, read, default(CancellationToken));
+            return ExecuteReader(command, read, CommandBehavior.Default, default);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CancellationToken cancellationToken)//2a=>4a
+        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CancellationToken cancellationToken)
         {
             return ExecuteReader(command, read, CommandBehavior.Default, cancellationToken);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CommandBehavior behavior)//3a=>4a
+        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CommandBehavior behavior)
         {
             return ExecuteReader(command, read, behavior, default);
         }
 
-        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CommandBehavior behavior, CancellationToken cancellationToken)//4a
+        public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CommandBehavior behavior, CancellationToken cancellationToken)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
@@ -304,6 +372,7 @@ namespace System.Data.SQLite
                         {
                             try
                             {
+                                cancellationToken.ThrowIfCancellationRequested();
                                 read?.Invoke(reader);
                             }
                             catch
@@ -331,19 +400,30 @@ namespace System.Data.SQLite
                 }, cancellationToken);
         }
 
+        #endregion
+
+        #region ExecuteScalar
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, params SQLiteParameter[] parameters)//1b=>2b
+        public object? ExecuteScalar(string sql, params SQLiteParameter[] parameters)
         {
-            return ExecuteReader(sql, read, default(CancellationToken), parameters);
+            return ExecuteScalar(sql, CommandBehavior.Default, default, parameters);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CancellationToken cancellationToken, params SQLiteParameter[] parameters)//2b=>4b
+        public object? ExecuteScalar(string sql, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
         {
-            return ExecuteReader(sql, read, CommandBehavior.Default, cancellationToken, parameters);
+            return ExecuteScalar(sql, CommandBehavior.Default, cancellationToken, parameters);
         }
 
-        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CommandBehavior behavior, params SQLiteParameter[] parameters)//3b=>3a
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public object? ExecuteScalar(string sql, CommandBehavior behavior, params SQLiteParameter[] parameters)
+        {
+            return ExecuteScalar(sql, behavior, default, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public object? ExecuteScalar(string sql, CommandBehavior behavior, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
         {
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(sql);
@@ -351,28 +431,28 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(sql);
 #endif
             using var command = CreateCommand(sql, parameters);
-            return ExecuteReader(command, read, behavior);
-        }
-
-        public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CommandBehavior behavior,
-            CancellationToken cancellationToken, params SQLiteParameter[] parameters)//4b=>4a
-        {
-#if NET8_0_OR_GREATER
-            ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
-            using var command = CreateCommand(sql, parameters);
-            return ExecuteReader(command, read, behavior, cancellationToken);
+            return ExecuteScalar(command, behavior, cancellationToken);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? ExecuteScalar(SQLiteCommand command)
         {
-            return ExecuteScalar(command, default);
+            return ExecuteScalar(command, CommandBehavior.Default, default);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? ExecuteScalar(SQLiteCommand command, CancellationToken cancellationToken)
+        {
+            return ExecuteScalar(command, CommandBehavior.Default, cancellationToken);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public object? ExecuteScalar(SQLiteCommand command, CommandBehavior behavior)
+        {
+            return ExecuteScalar(command, behavior, default);
+        }
+
+        public object? ExecuteScalar(SQLiteCommand command, CommandBehavior behavior, CancellationToken cancellationToken)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
@@ -384,7 +464,7 @@ namespace System.Data.SQLite
                 QuietOpen(out var open);
                 try
                 {
-                    return command.ExecuteScalar();
+                    return command.ExecuteScalar(behavior);
                 }
                 catch (Exception ex)
                 {
@@ -398,23 +478,7 @@ namespace System.Data.SQLite
             }, cancellationToken);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public object? ExecuteScalar(string sql, params SQLiteParameter[] parameters)
-        {
-            return ExecuteScalar(sql, default, parameters);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public object? ExecuteScalar(string sql, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
-        {
-#if NET8_0_OR_GREATER
-            ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
-            using var command = CreateCommand(sql, parameters);
-            return ExecuteScalar(command);
-        }
+        #endregion
 
         #endregion
     }

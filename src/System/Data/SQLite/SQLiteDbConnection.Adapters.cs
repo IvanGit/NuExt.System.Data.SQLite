@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Data.SQLite
 {
@@ -6,12 +7,16 @@ namespace System.Data.SQLite
     {
         #region Methods
 
+        #region CreateAdapter
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteDataAdapter CreateAdapter()
         {
             CheckDisposed();
             return new SQLiteDataAdapter();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SQLiteDataAdapter CreateAdapter(SQLiteCommand command)
         {
             CheckDisposed();
@@ -24,25 +29,51 @@ namespace System.Data.SQLite
             return new SQLiteDataAdapter() { SelectCommand = command };
         }
 
-        public void Fill(SQLiteDataAdapter adapter, DataTable table)
+        #endregion
+
+        #region Select
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DataTable Select(string tableName, IEnumerable<string> fields, string? expr, params SQLiteParameter[] parameters)
         {
-            Fill(adapter, table, default);
+            return Select(tableName, fields, expr, default, parameters);
         }
 
-        public void Fill(SQLiteDataAdapter adapter, DataTable table, CancellationToken cancellationToken)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DataTable Select(string tableName, IEnumerable<string> fields, string? expr, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
         {
-#if NET6_0_OR_GREATER
-            ArgumentNullException.ThrowIfNull(adapter);
-            ArgumentNullException.ThrowIfNull(table);
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(tableName);
 #else
-            Throw.IfNull(adapter);
-            Throw.IfNull(table);
+            Throw.IfNullOrEmpty(tableName);
 #endif
-
-            AcquireLock(() => adapter.Fill(table), cancellationToken);
+            return Select(CreateCommandSelect(tableName, fields, expr, parameters), cancellationToken);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DataTable Select(string sql, params SQLiteParameter[] parameters)
+        {
+            return Select(sql, default, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public DataTable Select(string sql, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
+        {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(sql);
+#else
+            Throw.IfNullOrEmpty(sql);
+#endif
+            return Select(CreateCommand(sql, parameters), cancellationToken);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DataTable Select(SQLiteCommand command)
+        {
+            return Select(command, default);
+        }
+
+        public DataTable Select(SQLiteCommand command, CancellationToken cancellationToken)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
@@ -54,7 +85,7 @@ namespace System.Data.SQLite
             {
                 adapter.SelectCommand = command;
                 var table = new DataTable();
-                Fill(adapter, table);
+                Fill(adapter, table, cancellationToken);
                 return table;
             }
             catch (Exception ex)
@@ -64,27 +95,51 @@ namespace System.Data.SQLite
             }
         }
 
-        public DataTable Select(string sql, params SQLiteParameter[] parameters)
+        #endregion
+
+        #region SelectForUpdate
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string tableName, IEnumerable<string> fields, string? expr, bool generateCommands, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
-            ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
-            return Select(CreateCommand(sql, parameters));
+            return SelectForUpdate(tableName, fields, expr, generateCommands, default, parameters);
         }
 
-        public DataTable Select(string tableName, IEnumerable<string> fields, string? where, params SQLiteParameter[] parameters)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string tableName, IEnumerable<string> fields, string? expr, bool generateCommands, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
         {
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
 #else
             Throw.IfNullOrEmpty(tableName);
 #endif
-            return Select(CreateCommandSelect(tableName, fields, where, parameters));
+            return SelectForUpdate(CreateCommandSelect(tableName, fields, expr, parameters), generateCommands, cancellationToken);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string sql, bool generateCommands, params SQLiteParameter[] parameters)
+        {
+            return SelectForUpdate(sql, generateCommands, default, parameters);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string sql, bool generateCommands, CancellationToken cancellationToken, params SQLiteParameter[] parameters)
+        {
+#if NET8_0_OR_GREATER
+            ArgumentException.ThrowIfNullOrEmpty(sql);
+#else
+            Throw.IfNullOrEmpty(sql);
+#endif
+            return SelectForUpdate(CreateCommand(sql, parameters), generateCommands, cancellationToken);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public (SQLiteDataAdapter, DataTable) SelectForUpdate(SQLiteCommand command, bool generateCommands)
+        {
+            return SelectForUpdate(command, generateCommands, default);
+        }
+
+        public (SQLiteDataAdapter, DataTable) SelectForUpdate(SQLiteCommand command, bool generateCommands, CancellationToken cancellationToken)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
@@ -96,7 +151,7 @@ namespace System.Data.SQLite
             {
                 adapter.SelectCommand = command;
                 var table = new DataTable();
-                Fill(adapter, table);
+                Fill(adapter, table, cancellationToken);
                 if (generateCommands)
                 {
                     var cmdBuilder = new SQLiteCommandBuilder(adapter);
@@ -119,25 +174,32 @@ namespace System.Data.SQLite
             }
         }
 
-        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string sql, bool generateCommands, params SQLiteParameter[] parameters)
+        #endregion
+
+        #region Fill
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Fill(SQLiteDataAdapter adapter, DataTable table)
         {
-#if NET8_0_OR_GREATER
-            ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
-            return SelectForUpdate(CreateCommand(sql, parameters), generateCommands);
+            Fill(adapter, table, default);
         }
 
-        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string tableName, IEnumerable<string> fields, string? where, bool generateCommands, params SQLiteParameter[] parameters)
+        public void Fill(SQLiteDataAdapter adapter, DataTable table, CancellationToken cancellationToken)
         {
-#if NET8_0_OR_GREATER
-            ArgumentException.ThrowIfNullOrEmpty(tableName);
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(adapter);
+            ArgumentNullException.ThrowIfNull(table);
 #else
-            Throw.IfNullOrEmpty(tableName);
+            Throw.IfNull(adapter);
+            Throw.IfNull(table);
 #endif
-            return SelectForUpdate(CreateCommandSelect(tableName, fields, where, parameters), generateCommands);
+
+            AcquireLock(() => adapter.Fill(table), cancellationToken);
         }
+
+        #endregion
+
+        #region Update
 
         public int Update(SQLiteDataAdapter adapter, DataTable table)
         {
@@ -156,6 +218,8 @@ namespace System.Data.SQLite
             //Update requires a valid UpdateCommand when passed DataRow collection with modified rows.
             return AcquireLock(() => adapter.Update(table), cancellationToken);
         }
+
+        #endregion
 
         #endregion
     }
