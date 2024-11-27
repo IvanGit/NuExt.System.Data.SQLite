@@ -6,24 +6,20 @@ namespace System.Data.SQLite
     /// Represents an abstract base class for SQLite-specific Data Access Layer (DAL) operations,
     /// providing a framework for database context management and execution of SQLite database-related actions.
     /// </summary>
-    public abstract class SQLiteDalBase : DalBase<SQLiteDbContext>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="SQLiteDalBase"/> class with the specified connection creation function.
+    /// </remarks>
+    /// <param name="createConnection">A function that creates a new <see cref="SQLiteDbConnection"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="createConnection"/> is null.</exception>
+    public abstract class SQLiteDalBase(Func<SQLiteDbConnection> createConnection) : DalBase<SQLiteDbContext>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SQLiteDalBase"/> class with the specified connection creation function.
-        /// </summary>
-        /// <param name="createConnection">A function that creates a new <see cref="SQLiteDbConnection"/>.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="createConnection"/> is null.</exception>
-        protected SQLiteDalBase(Func<SQLiteDbConnection> createConnection)
-        {
-            CreateConnection = createConnection ?? throw new ArgumentNullException(nameof(createConnection));
-        }
 
         #region Properties
 
         /// <summary>
         /// Gets the function used to create a new <see cref="SQLiteDbConnection"/>.
         /// </summary>
-        protected Func<SQLiteDbConnection> CreateConnection { get; }
+        protected Func<SQLiteDbConnection> CreateConnection { get; } = createConnection ?? throw new ArgumentNullException(nameof(createConnection));
 
         #endregion
 
