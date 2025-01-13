@@ -7,7 +7,7 @@ namespace System.Data
     {
         public static void Initialize(this IReadOnlyList<SQLiteDbConverter> converters, Func<SQLiteDbConnection> createConnection, CancellationToken cancellationToken)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(converters);
             ArgumentNullException.ThrowIfNull(createConnection);
 #else
@@ -23,7 +23,7 @@ namespace System.Data
 
         public static void Initialize(this IReadOnlyList<SQLiteDbConverter> converters, SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(converters);
             ArgumentNullException.ThrowIfNull(connection);
 #else

@@ -1,0 +1,24 @@
+<Project>
+
+  <ItemGroup>
+    <Compile Update="**\*.Adapters.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Adapters', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\*.Asserts.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Asserts', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\*.AsyncLock.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.AsyncLock', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\*.Commands.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Commands', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\*.IDbConnection.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.IDbConnection', '.cs'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\*.Transactions.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Transactions', '.cs'))</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

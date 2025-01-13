@@ -51,7 +51,7 @@ namespace System.Data.SQLite
         /// </exception>
         protected override ValueTask TryExecuteInDbContextAsync(SQLiteDbContext? context, Action<SQLiteDbContext> action, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(action);
 #else
             Throw.IfNull(action);
@@ -95,7 +95,7 @@ namespace System.Data.SQLite
         /// </exception>
         protected override async ValueTask TryExecuteInDbContextAsync(SQLiteDbContext? context, Func<SQLiteDbContext, ValueTask> action, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(action);
 #else
             Throw.IfNull(action);
@@ -140,7 +140,7 @@ namespace System.Data.SQLite
         /// </exception>
         protected override ValueTask<T> TryExecuteInDbContextAsync<T>(SQLiteDbContext? context, Func<SQLiteDbContext, T> func, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(func);
 #else
             Throw.IfNull(func);
@@ -187,7 +187,7 @@ namespace System.Data.SQLite
         /// </exception>
         protected override async ValueTask<T> TryExecuteInDbContextAsync<T>(SQLiteDbContext? context, Func<SQLiteDbContext, ValueTask<T>> func, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(func);
 #else
             Throw.IfNull(func);

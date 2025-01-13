@@ -8,7 +8,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(action is not null, $"{nameof(action)} is null");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
             ArgumentNullException.ThrowIfNull(action);
 #else
@@ -49,7 +49,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(action is not null, $"{nameof(action)} is null");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
             ArgumentNullException.ThrowIfNull(action);
 #else
@@ -90,7 +90,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -117,7 +117,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -135,7 +135,7 @@ namespace System.Data.SQLite
         public static ICollection<string> GetAllTables(this SQLiteDbConnection connection, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -156,7 +156,7 @@ namespace System.Data.SQLite
         public static ICollection<string> GetAllViews(this SQLiteDbConnection connection, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -178,7 +178,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -204,7 +204,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -222,7 +222,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -242,7 +242,7 @@ namespace System.Data.SQLite
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
             Debug.Assert(!string.IsNullOrEmpty(indexName), $"{nameof(indexName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -266,7 +266,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(triggerName), $"{nameof(triggerName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
@@ -285,7 +285,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(viewName), $"{nameof(viewName)} is null or empty");
-#if NET6_0_OR_GREATER
+#if NET
             ArgumentNullException.ThrowIfNull(connection);
 #else
             Throw.IfNull(connection);
