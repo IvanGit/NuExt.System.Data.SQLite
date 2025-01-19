@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Data;
 using System.Data.SQLite;
 using System.Diagnostics;
