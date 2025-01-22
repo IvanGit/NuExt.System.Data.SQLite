@@ -1,24 +1,16 @@
 <Project>
-
   <ItemGroup>
-    <Compile Update="**\*.Adapters.cs">
-      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Adapters', '.cs'))</DependentUpon>
+    <CsFiles Include="**\*.*.cs" Exclude="**\*.xaml.cs;**\*.axaml.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="@(CsFiles)">
+      <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)', '\..*$', '.cs'))</DependentUpon>
     </Compile>
-    <Compile Update="**\*.Asserts.cs">
-      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Asserts', '.cs'))</DependentUpon>
+    <Compile Update="**\*Extensions.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('Extensions', '.cs'))</DependentUpon>
     </Compile>
-    <Compile Update="**\*.AsyncLock.cs">
-      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.AsyncLock', '.cs'))</DependentUpon>
-    </Compile>
-    <Compile Update="**\*.Commands.cs">
-      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Commands', '.cs'))</DependentUpon>
-    </Compile>
-    <Compile Update="**\*.IDbConnection.cs">
-      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.IDbConnection', '.cs'))</DependentUpon>
-    </Compile>
-    <Compile Update="**\*.Transactions.cs">
-      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Transactions', '.cs'))</DependentUpon>
+    <Compile Update="**\*Factory.cs">
+      <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('Factory', '.cs'))</DependentUpon>
     </Compile>
   </ItemGroup>
-
 </Project>
