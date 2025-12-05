@@ -82,7 +82,7 @@ namespace System.Data.SQLite
         #region SelectForUpdate
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string tableName, IEnumerable<string> fields, string? expr = null, bool generateCommands = true, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
+        public (SQLiteDataAdapter Adapter, DataTable Table) SelectForUpdate(string tableName, IEnumerable<string> fields, string? expr = null, bool generateCommands = true, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
         {
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
@@ -93,7 +93,7 @@ namespace System.Data.SQLite
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public (SQLiteDataAdapter, DataTable) SelectForUpdate(string sql, bool generateCommands = true, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
+        public (SQLiteDataAdapter Adapter, DataTable Table) SelectForUpdate(string sql, bool generateCommands = true, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
         {
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(sql);
@@ -103,7 +103,7 @@ namespace System.Data.SQLite
             return SelectForUpdate(CreateCommand(sql, parameters), generateCommands, cancellationToken);
         }
 
-        public (SQLiteDataAdapter, DataTable) SelectForUpdate(SQLiteCommand command, bool generateCommands = true, CancellationToken cancellationToken = default)
+        public (SQLiteDataAdapter Adapter, DataTable Table) SelectForUpdate(SQLiteCommand command, bool generateCommands = true, CancellationToken cancellationToken = default)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);

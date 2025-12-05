@@ -55,9 +55,9 @@ namespace MoviesAppSample.Services
                         var movie = new Movie() 
                         { 
                             Id = dto.Id, Title = dto.Title, Description = dto.Description, DateReleased = dto.DateReleased, 
-                            Starring = starringDtos.Select(p => new Person(){ Id = p.Id, Name = p.Name}).ToList(), 
-                            DirectedBy = directedByDtos.Select(p => new Person() { Id = p.Id, Name = p.Name }).ToList(),
-                            ScreenplayBy = screenplayByDtos.Select(p => new Person() { Id = p.Id, Name = p.Name }).ToList()
+                            Starring = [.. starringDtos.Select(p => new Person(){ Id = p.Id, Name = p.Name})], 
+                            DirectedBy = [.. directedByDtos.Select(p => new Person() { Id = p.Id, Name = p.Name })],
+                            ScreenplayBy = [.. screenplayByDtos.Select(p => new Person() { Id = p.Id, Name = p.Name })]
                         };
                         movies.Add(movie);
                     }

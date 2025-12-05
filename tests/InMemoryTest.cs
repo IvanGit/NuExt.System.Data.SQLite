@@ -112,11 +112,11 @@ CREATE TABLE Sample (
                         }
                     }
                     int num = conn.Update(adapter, table);
-                    Assert.Multiple(() =>
+                    using (Assert.EnterMultipleScope())
                     {
                         Assert.That(expected, Is.EqualTo(7));
                         Assert.That(num, Is.EqualTo(expected));
-                    });
+                    }
                 }
                 table.ClearAndDispose();
 

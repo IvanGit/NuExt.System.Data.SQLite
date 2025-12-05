@@ -1,9 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net9.0;net8.0;net6.0;net462</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net10.0;net9.0;net8.0;net471;net462</TargetFrameworks>
+    <!-- System.ValueTuple is inbox on .NET Framework >= 4.7.1 and therefore any potential redirect for it should be removed.
+         This is necessary as the assembly version in the already shipped packages is higher than what's provided inbox on .NET Framework. -->
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageTags>nuext;sqlite;database;ado.net;provider;interop;async</PackageTags>
     <Description>Provides SQLite database engine extensions.
@@ -14,17 +17,13 @@ System.Data.SQLite.SQLiteDbConnection
 System.Data.SQLite.SQLiteDbContext
 System.Data.SQLite.SQLiteDbConverter
 System.Data.SQLite.SQLiteDbTransaction</Description>
-    <Version>0.3.3</Version>
+    <Version>0.4.0</Version>
     <RootNamespace />
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);1591;NETSDK1233</NoWarn>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>logo128.png</PackageIcon>
     <PackageProjectUrl>https://github.com/IvanGit/NuExt.System.Data.SQLite</PackageProjectUrl>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net462'">
-    <DefineConstants>$(DefineConstants);NET_OLD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +31,7 @@ System.Data.SQLite.SQLiteDbTransaction</Description>
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.System.Data" Version="0.3.3" />
+    <PackageReference Include="NuExt.System.Data" Version="0.4.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'false'">

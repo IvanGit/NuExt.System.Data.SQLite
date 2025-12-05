@@ -15,21 +15,14 @@ namespace System.Data.SQLite
         public static SQLiteParameter CreateInputParam(this DbType dbType, string parameterName, object? objValue = null)
         {
             Debug.Assert(!string.IsNullOrEmpty(parameterName), $"{nameof(parameterName)} is null or empty");
-#if NET_OLD
-            Debug.Assert(parameterName?.StartsWith("@") == true, $"Parameter name '{parameterName}' should starts with '@'");
-#else
             Debug.Assert(parameterName?.StartsWith('@') == true, $"Parameter name '{parameterName}' should starts with '@'");
-#endif
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(parameterName);
 #else
             Throw.IfNullOrEmpty(parameterName);
 #endif
-#if NET_OLD
-            Throw.ArgumentExceptionIf(parameterName.StartsWith("@") != true, $"Parameter '{parameterName}' should starts with '@'");
-#else
             Throw.ArgumentExceptionIf(parameterName.StartsWith('@') != true, $"Parameter '{parameterName}' should starts with '@'");
-#endif
+
             var param = new SQLiteParameter(parameterName, dbType);
             if (objValue is null)
             {
@@ -54,11 +47,7 @@ namespace System.Data.SQLite
         public static SQLiteParameter CreateSourceParam(this DbType dbType, string parameterName, string sourceColumn)
         {
             Debug.Assert(!string.IsNullOrEmpty(parameterName), $"{nameof(parameterName)} is null or empty");
-#if NET_OLD
-            Debug.Assert(parameterName?.StartsWith("@") == true, $"Parameter name '{parameterName}' should starts with '@'");
-#else
             Debug.Assert(parameterName?.StartsWith('@') == true, $"Parameter name '{parameterName}' should starts with '@'");
-#endif
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(parameterName);
             ArgumentException.ThrowIfNullOrEmpty(sourceColumn);
@@ -66,11 +55,8 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(parameterName);
             Throw.IfNullOrEmpty(sourceColumn);
 #endif
-#if NET_OLD
-            Throw.ArgumentExceptionIf(parameterName.StartsWith("@") != true, $"Parameter '{parameterName}' should starts with '@'");
-#else
             Throw.ArgumentExceptionIf(parameterName.StartsWith('@') != true, $"Parameter '{parameterName}' should starts with '@'");
-#endif
+
             return new SQLiteParameter(parameterName, dbType, sourceColumn);
         }
 
@@ -86,11 +72,7 @@ namespace System.Data.SQLite
         public static SQLiteParameter CreateSourceParam(this DbType dbType, string parameterName, string sourceColumn, DataRowVersion rowVersion)
         {
             Debug.Assert(!string.IsNullOrEmpty(parameterName), $"{nameof(parameterName)} is null or empty");
-#if NET_OLD
-            Debug.Assert(parameterName?.StartsWith("@") == true, $"Parameter name '{parameterName}' should starts with '@'");
-#else
             Debug.Assert(parameterName?.StartsWith('@') == true, $"Parameter name '{parameterName}' should starts with '@'");
-#endif
 #if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(parameterName);
             ArgumentException.ThrowIfNullOrEmpty(sourceColumn);
@@ -98,11 +80,8 @@ namespace System.Data.SQLite
             Throw.IfNullOrEmpty(parameterName);
             Throw.IfNullOrEmpty(sourceColumn);
 #endif
-#if NET_OLD
-            Throw.ArgumentExceptionIf(parameterName.StartsWith("@") != true, $"Parameter '{parameterName}' should starts with '@'");
-#else
             Throw.ArgumentExceptionIf(parameterName.StartsWith('@') != true, $"Parameter '{parameterName}' should starts with '@'");
-#endif
+
             return new SQLiteParameter(parameterName, dbType, sourceColumn, rowVersion);
         }
     }
