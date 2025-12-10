@@ -16,11 +16,7 @@ namespace System.Data.SQLite
         {
             Debug.Assert(!string.IsNullOrEmpty(parameterName), $"{nameof(parameterName)} is null or empty");
             Debug.Assert(parameterName?.StartsWith('@') == true, $"Parameter name '{parameterName}' should starts with '@'");
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(parameterName);
-#else
-            Throw.IfNullOrEmpty(parameterName);
-#endif
             Throw.ArgumentExceptionIf(parameterName.StartsWith('@') != true, $"Parameter '{parameterName}' should starts with '@'");
 
             var param = new SQLiteParameter(parameterName, dbType);
@@ -48,13 +44,8 @@ namespace System.Data.SQLite
         {
             Debug.Assert(!string.IsNullOrEmpty(parameterName), $"{nameof(parameterName)} is null or empty");
             Debug.Assert(parameterName?.StartsWith('@') == true, $"Parameter name '{parameterName}' should starts with '@'");
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(parameterName);
             ArgumentException.ThrowIfNullOrEmpty(sourceColumn);
-#else
-            Throw.IfNullOrEmpty(parameterName);
-            Throw.IfNullOrEmpty(sourceColumn);
-#endif
             Throw.ArgumentExceptionIf(parameterName.StartsWith('@') != true, $"Parameter '{parameterName}' should starts with '@'");
 
             return new SQLiteParameter(parameterName, dbType, sourceColumn);
@@ -73,13 +64,8 @@ namespace System.Data.SQLite
         {
             Debug.Assert(!string.IsNullOrEmpty(parameterName), $"{nameof(parameterName)} is null or empty");
             Debug.Assert(parameterName?.StartsWith('@') == true, $"Parameter name '{parameterName}' should starts with '@'");
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(parameterName);
             ArgumentException.ThrowIfNullOrEmpty(sourceColumn);
-#else
-            Throw.IfNullOrEmpty(parameterName);
-            Throw.IfNullOrEmpty(sourceColumn);
-#endif
             Throw.ArgumentExceptionIf(parameterName.StartsWith('@') != true, $"Parameter '{parameterName}' should starts with '@'");
 
             return new SQLiteParameter(parameterName, dbType, sourceColumn, rowVersion);

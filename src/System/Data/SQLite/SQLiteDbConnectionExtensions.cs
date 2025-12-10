@@ -8,15 +8,11 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(action is not null, $"{nameof(action)} is null");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
             ArgumentNullException.ThrowIfNull(action);
-#else
-            Throw.IfNull(connection);
-            Throw.IfNull(action);
-#endif
             Debug.Assert(!connection.InTransaction, $"{nameof(connection)} in transaction.");
             Throw.InvalidOperationExceptionIf(connection.InTransaction, $"{nameof(connection)} in transaction.");
+
             connection.AcquireLock(() =>
                 {
                     connection.QuietOpen(out var open);
@@ -49,15 +45,11 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(action is not null, $"{nameof(action)} is null");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
             ArgumentNullException.ThrowIfNull(action);
-#else
-            Throw.IfNull(connection);
-            Throw.IfNull(action);
-#endif
             Debug.Assert(!connection.InTransaction, $"{nameof(connection)} in transaction.");
             Throw.InvalidOperationExceptionIf(connection.InTransaction, $"{nameof(connection)} in transaction.");
+
             return connection.AcquireLock(() =>
                 {
                     connection.QuietOpen(out var open);
@@ -90,16 +82,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
+
             var columns = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
             connection.ExecuteReader($"PRAGMA table_info('{tableName}')", Read, CommandBehavior.Default, cancellationToken);
@@ -117,16 +102,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
+
             var schema = connection.Select($"SELECT * FROM \"{tableName}\" WHERE 0=1", cancellationToken);
             schema.TableName = tableName;
             return schema;
@@ -135,11 +113,8 @@ namespace System.Data.SQLite
         public static ICollection<string> GetAllTables(this SQLiteDbConnection connection, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
+
             var tables = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
             connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='table'", Read, CommandBehavior.Default, cancellationToken);
@@ -156,11 +131,8 @@ namespace System.Data.SQLite
         public static ICollection<string> GetAllViews(this SQLiteDbConnection connection, CancellationToken cancellationToken = default)
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
+
             var tables = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
             connection.ExecuteReader("SELECT * FROM sqlite_master WHERE type='view'", Read, CommandBehavior.Default, cancellationToken);
@@ -178,16 +150,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
+
             var indexes = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             int? index = null;
             void Read(SQLiteDataReader reader)
@@ -204,16 +169,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
+
             var res = connection.ExecuteScalar($"SELECT 1 FROM \"{tableName}\" LIMIT 1", CommandBehavior.Default, cancellationToken);
             return res is null;
         }
@@ -222,16 +180,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
+
             var res = connection.ExecuteScalar("SELECT 1 FROM sqlite_master WHERE name=@name and type='table' LIMIT 1",
                 CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@name", tableName));
             return res is not null;
@@ -242,18 +193,10 @@ namespace System.Data.SQLite
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(tableName), $"{nameof(tableName)} is null or empty");
             Debug.Assert(!string.IsNullOrEmpty(indexName), $"{nameof(indexName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
             ArgumentException.ThrowIfNullOrEmpty(indexName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-            Throw.IfNullOrEmpty(indexName);
-#endif
+
             var res = connection.ExecuteScalar(
                 "SELECT 1 FROM sqlite_master WHERE tbl_name=@tbl_name AND name=@name and type='index' LIMIT 1",
                 CommandBehavior.Default, cancellationToken,
@@ -266,16 +209,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(triggerName), $"{nameof(triggerName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(triggerName);
-#else
-            Throw.IfNullOrEmpty(triggerName);
-#endif
+
             var res = connection.ExecuteScalar("SELECT 1 FROM sqlite_master WHERE name=@name and type='trigger' LIMIT 1",
                 CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@name", triggerName));
             return res is not null;
@@ -285,16 +221,9 @@ namespace System.Data.SQLite
         {
             Debug.Assert(connection is not null, $"{nameof(connection)} is null");
             Debug.Assert(!string.IsNullOrEmpty(viewName), $"{nameof(viewName)} is null or empty");
-#if NET
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(connection);
-#endif
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(viewName);
-#else
-            Throw.IfNullOrEmpty(viewName);
-#endif
+
             var res = connection.ExecuteScalar("SELECT 1 FROM sqlite_master WHERE name=@name and type='view' LIMIT 1",
                 CommandBehavior.Default, cancellationToken, DbType.String.CreateInputParam("@name", viewName));
             return res is not null;

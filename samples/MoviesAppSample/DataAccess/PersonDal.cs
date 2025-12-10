@@ -105,12 +105,9 @@ namespace MoviesAppSample.DataAccess
 
         private ValueTask<bool> SaveMoviePersonsAsync(SQLiteDbContext context, string tableName, long movieId, List<PersonDto> dtos, CancellationToken cancellationToken)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(dtos);
-#else
-            Throw.IfNull(dtos);
-#endif
             Debug.Assert(movieId > 0);
+
             cancellationToken.ThrowIfCancellationRequested();
             return TryExecuteInDbContextAsync(context, ctx =>
             {
@@ -151,11 +148,7 @@ namespace MoviesAppSample.DataAccess
 
         public ValueTask<bool> SavePersonsAsync(SQLiteDbContext context, List<PersonDto> dtos, CancellationToken cancellationToken)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(dtos);
-#else
-            Throw.IfNull(dtos);
-#endif
 
             cancellationToken.ThrowIfCancellationRequested();
             return TryExecuteInDbContextAsync(context, ctx =>

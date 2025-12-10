@@ -18,11 +18,8 @@ namespace MoviesAppSample.Models
     {
         public static MovieDto ToDto(this Movie movie)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(movie);
-#else
-            Throw.IfNull(movie);
-#endif
+
             return new MovieDto(movie.Id, movie.Title, movie.Description, movie.DateReleased);
         }
     }

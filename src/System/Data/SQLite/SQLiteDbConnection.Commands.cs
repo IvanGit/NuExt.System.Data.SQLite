@@ -31,17 +31,13 @@ namespace System.Data.SQLite
 
         public SQLiteCommand CreateCommandInsert(string tableName, IEnumerable<string> fields, string? expr = null, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
             if (fields.Count() != parameters.Length)
             {
                 Debug.Assert(false, $"{nameof(CreateCommandInsert)}: argument count mismatch");
                 Throw.ArgumentException($"{nameof(CreateCommandInsert)}: argument count mismatch");
             }
-            var builder = new ValueStringBuilder();
+            var builder = new ValueStringBuilder(stackalloc char[StackallocCharBufferSizeLimit]);
             builder.Append($"INSERT INTO \"{tableName}\" (");
             string delimiter = string.Empty;
             foreach (string field in fields)
@@ -67,17 +63,13 @@ namespace System.Data.SQLite
 
         public SQLiteCommand CreateCommandInsertOrIgnore(string tableName, IEnumerable<string> fields, string? expr = null, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
             if (fields.Count() != parameters.Length)
             {
                 Debug.Assert(false, $"{nameof(CreateCommandInsertOrIgnore)}: argument count mismatch");
                 Throw.ArgumentException($"{nameof(CreateCommandInsertOrIgnore)}: argument count mismatch");
             }
-            var builder = new ValueStringBuilder();
+            var builder = new ValueStringBuilder(stackalloc char[StackallocCharBufferSizeLimit]);
             builder.Append($"INSERT OR IGNORE INTO \"{tableName}\" (");
             string delimiter = string.Empty;
             foreach (string field in fields)
@@ -103,17 +95,13 @@ namespace System.Data.SQLite
 
         public SQLiteCommand CreateCommandInsertOrReplace(string tableName, IEnumerable<string> fields, string? expr = null, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
             if (fields.Count() != parameters.Length)
             {
                 Debug.Assert(false, $"{nameof(CreateCommandInsertOrReplace)}: argument count mismatch");
                 Throw.ArgumentException($"{nameof(CreateCommandInsertOrReplace)}: argument count mismatch");
             }
-            var builder = new ValueStringBuilder();
+            var builder = new ValueStringBuilder(stackalloc char[StackallocCharBufferSizeLimit]);
             builder.Append($"REPLACE INTO \"{tableName}\" (");//Alias for INSERT OR REPLACE
             string delimiter = string.Empty;
             foreach (string field in fields)
@@ -139,12 +127,9 @@ namespace System.Data.SQLite
 
         public SQLiteCommand CreateCommandSelect(string tableName, IEnumerable<string> fields, string? expr = null, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
-            var builder = new ValueStringBuilder();
+
+            var builder = new ValueStringBuilder(stackalloc char[StackallocCharBufferSizeLimit]);
             builder.Append("SELECT ");
             string delimiter = string.Empty;
             foreach (string field in fields)
@@ -163,17 +148,13 @@ namespace System.Data.SQLite
 
         public SQLiteCommand CreateCommandUpdate(string tableName, IEnumerable<string> fields, string? expr = null, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
             if (fields.Count() > parameters.Length)
             {
                 Debug.Assert(false, $"{nameof(CreateCommandUpdate)}: argument count mismatch");
                 Throw.ArgumentException($"{nameof(CreateCommandUpdate)}: argument count mismatch");
             }
-            var builder = new ValueStringBuilder();
+            var builder = new ValueStringBuilder(stackalloc char[StackallocCharBufferSizeLimit]);
             builder.Append($"UPDATE \"{tableName}\" SET ");
             string delimiter = string.Empty;
             foreach (string field in fields)
@@ -191,12 +172,9 @@ namespace System.Data.SQLite
 
         public SQLiteCommand CreateCommandDelete(string tableName, string? expr = null, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(tableName);
-#else
-            Throw.IfNullOrEmpty(tableName);
-#endif
-            var builder = new ValueStringBuilder();
+
+            var builder = new ValueStringBuilder(stackalloc char[StackallocCharBufferSizeLimit]);
             builder.Append($"DELETE FROM \"{tableName}\"");
             if (!string.IsNullOrEmpty(expr))
             {
@@ -213,22 +191,16 @@ namespace System.Data.SQLite
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ExecuteNonQuery(string sql, CommandBehavior behavior = CommandBehavior.Default, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
+
             using var command = CreateCommand(sql, parameters);
             return ExecuteNonQuery(command, behavior, cancellationToken);
         }
 
         public int ExecuteNonQuery(SQLiteCommand command, CommandBehavior behavior = CommandBehavior.Default, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
-#else
-            Throw.IfNull(command);
-#endif
+
             return AcquireLock(() =>
                 {
                     QuietOpen(out var open);
@@ -255,22 +227,16 @@ namespace System.Data.SQLite
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int ExecuteReader(string sql, Action<SQLiteDataReader>? read, CommandBehavior behavior = CommandBehavior.Default, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
+
             using var command = CreateCommand(sql, parameters);
             return ExecuteReader(command, read, behavior, cancellationToken);
         }
 
         public int ExecuteReader(SQLiteCommand command, Action<SQLiteDataReader>? read, CommandBehavior behavior = CommandBehavior.Default, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
-#else
-            Throw.IfNull(command);
-#endif
+
             return AcquireLock(() =>
                 {
                     int count = 0;
@@ -317,22 +283,16 @@ namespace System.Data.SQLite
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object? ExecuteScalar(string sql, CommandBehavior behavior = CommandBehavior.Default, CancellationToken cancellationToken = default, params SQLiteParameter[] parameters)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(sql);
-#else
-            Throw.IfNullOrEmpty(sql);
-#endif
+
             using var command = CreateCommand(sql, parameters);
             return ExecuteScalar(command, behavior, cancellationToken);
         }
 
         public object? ExecuteScalar(SQLiteCommand command, CommandBehavior behavior = CommandBehavior.Default, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(command);
-#else
-            Throw.IfNull(command);
-#endif
+
             return AcquireLock(() =>
             {
                 QuietOpen(out var open);

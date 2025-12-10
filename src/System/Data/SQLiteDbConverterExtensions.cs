@@ -7,13 +7,9 @@ namespace System.Data
     {
         public static void Initialize(this IReadOnlyList<SQLiteDbConverter> converters, Func<SQLiteDbConnection> createConnection, CancellationToken cancellationToken)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(converters);
             ArgumentNullException.ThrowIfNull(createConnection);
-#else
-            Throw.IfNull(converters);
-            Throw.IfNull(createConnection);
-#endif
+
             using var connection = createConnection();
             connection.AcquireLock(() =>
             {
@@ -23,13 +19,8 @@ namespace System.Data
 
         public static void Initialize(this IReadOnlyList<SQLiteDbConverter> converters, SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
-#if NET
             ArgumentNullException.ThrowIfNull(converters);
             ArgumentNullException.ThrowIfNull(connection);
-#else
-            Throw.IfNull(converters);
-            Throw.IfNull(connection);
-#endif
             Debug.Assert(connection.InTransaction == false, $"{nameof(connection)} in transaction state.");
             Throw.InvalidOperationExceptionIf(connection.InTransaction, $"{nameof(connection)} in transaction state.");
             Debug.Assert(connection.IsAcquired, $"{nameof(connection)} is not acquired.");

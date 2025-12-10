@@ -16,6 +16,8 @@ namespace System.Data.SQLite
         private SQLiteDbConnectionFactory.AsyncLockCounter _syncRoot;
         internal volatile int TransactionCount;
 
+        internal const int StackallocCharBufferSizeLimit = 256;
+
         /// <summary>
         /// Initializes the connection with the specified connection string.
         /// </summary>
@@ -32,11 +34,8 @@ namespace System.Data.SQLite
         /// <param name="useSharedLock">Use a shared lock to facilitate multi-threading in database access and eliminate "Database is locked" exceptions.</param>
         public SQLiteDbConnection(string connectionString, bool useSharedLock)
         {
-#if NET8_0_OR_GREATER
             ArgumentException.ThrowIfNullOrEmpty(connectionString);
-#else
-            Throw.IfNullOrEmpty(connectionString);
-#endif
+
             var csb = new SQLiteConnectionStringBuilder(connectionString);//throws if connection string is invalid
             _conn = new SQLiteConnection(connectionString);
             UseSharedLock = useSharedLock;

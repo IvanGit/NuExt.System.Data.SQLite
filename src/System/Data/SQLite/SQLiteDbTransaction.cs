@@ -62,11 +62,8 @@ namespace System.Data.SQLite
         {
             CheckDisposed();
             Debug.Assert(command != null, $"{nameof(command)} is null");
-#if NET
             ArgumentNullException.ThrowIfNull(command);
-#else
-            Throw.IfNull(command);
-#endif
+
             command.Transaction = _transaction;
         }
 
