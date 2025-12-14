@@ -17,7 +17,7 @@ System.Data.SQLite.SQLiteDbConnection
 System.Data.SQLite.SQLiteDbContext
 System.Data.SQLite.SQLiteDbConverter
 System.Data.SQLite.SQLiteDbTransaction</Description>
-    <Version>0.4.1</Version>
+    <Version>0.5.1</Version>
     <RootNamespace />
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591;NETSDK1233</NoWarn>
@@ -31,7 +31,7 @@ System.Data.SQLite.SQLiteDbTransaction</Description>
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'true'">
-    <PackageReference Include="NuExt.System.Data" Version="0.4.1" />
+    <PackageReference Include="NuExt.System.Data" Version="0.5.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseNuExtPackages)' == 'false'">

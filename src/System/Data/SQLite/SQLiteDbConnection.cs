@@ -75,7 +75,7 @@ namespace System.Data.SQLite
             get
             {
                 CheckDisposed();
-                return _syncRoot.Mutex.IsEntered;
+                return _syncRoot.Mutex.IsHeldByCurrentFlow;
             }
         }
 
@@ -121,7 +121,7 @@ namespace System.Data.SQLite
             QuietClose(originalState);
         }
 
-        protected override void OnDispose()
+        protected override void DisposeCore()
         {
             Close();
             _conn.Dispose();
@@ -141,7 +141,7 @@ namespace System.Data.SQLite
                     syncRoot.Dispose();
                 }
             }
-            base.OnDispose();
+            base.DisposeCore();
         }
 
         public void Open()

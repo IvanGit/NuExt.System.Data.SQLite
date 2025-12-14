@@ -12,10 +12,10 @@
 #if DEBUG
             internal bool IsExpired => ReferenceCount <= 0;
 #endif
-            protected override void OnDispose()
+            protected override void DisposeCore()
             {
                 Mutex.Dispose();
-                base.OnDispose();
+                base.DisposeCore();
             }
         }
 

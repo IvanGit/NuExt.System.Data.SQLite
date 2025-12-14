@@ -98,14 +98,14 @@ namespace System.Data.SQLite
         /// <summary>
         /// Disposes the resources used by this context.
         /// </summary>
-        protected override void OnDispose()
+        protected override void DisposeCore()
         {
             if (_checkAcquired)
             {
                 CheckAcquired();
             }
             _lifetime.Dispose();
-            base.OnDispose();
+            base.DisposeCore();
         }
 
         /// <summary>

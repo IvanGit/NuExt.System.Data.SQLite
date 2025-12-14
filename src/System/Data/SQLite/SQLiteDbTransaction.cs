@@ -82,7 +82,7 @@ namespace System.Data.SQLite
         /// <summary>
         /// Disposes the resources used by this transaction.
         /// </summary>
-        protected override void OnDispose()
+        protected override void DisposeCore()
         {
             try
             {
@@ -96,7 +96,7 @@ namespace System.Data.SQLite
                 var timeout = _connection.DefaultTimeout;
                 Debug.Assert(elapsed.TotalSeconds < timeout, $"Transaction elapsed: {elapsed}, Expected: {timeout} sec");
 #endif
-                base.OnDispose();
+                base.DisposeCore();
             }
         }
 
