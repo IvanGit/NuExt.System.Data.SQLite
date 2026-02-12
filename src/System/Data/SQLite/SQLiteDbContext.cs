@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System.Data.SQLite
@@ -10,7 +11,11 @@ namespace System.Data.SQLite
     public sealed class SQLiteDbContext: Disposable, IDbContext
     {
         private readonly SQLiteDbTransaction _transaction;
-        private readonly Lifetime _lifetime = new();
+        private readonly Lifetime _lifetime = new Lifetime()
+#if DEBUG
+                .SetDebugInfo()
+#endif
+            ;
         private readonly bool _checkAcquired;
 
         /// <summary>

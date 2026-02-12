@@ -1,4 +1,6 @@
-﻿namespace System.Data.SQLite
+﻿using System.ComponentModel;
+
+namespace System.Data.SQLite
 {
     internal class SQLiteDbConnectionFactory
     {

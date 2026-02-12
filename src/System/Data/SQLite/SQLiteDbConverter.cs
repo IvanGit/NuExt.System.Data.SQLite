@@ -81,7 +81,7 @@ END;
         /// </summary>
         /// <param name="connection">The database connection to use for performing the updates.</param>
         /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
-        /// <returns><c>true</c> if the update operations were successful; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the update operations were successful; otherwise, <see langword="false"/>.</returns>
         protected abstract bool PerformUpdate(SQLiteDbConnection connection, CancellationToken cancellationToken);
 
         /// <summary>
@@ -89,7 +89,7 @@ END;
         /// </summary>
         /// <param name="connection">The database connection to check.</param>
         /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
-        /// <returns><c>true</c> if the database requires an update; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the database requires an update; otherwise, <see langword="false"/>.</returns>
         public override bool RequiresUpdate(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             using var _ = connection.SuspendAsserts();
@@ -111,7 +111,7 @@ END;
         /// <param name="connection">The database connection to use for adding version information.</param>
         /// <param name="dbVersion">The version value to insert into the version table.</param>
         /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
-        /// <returns><c>true</c> if the version information was successfully added; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the version information was successfully added; otherwise, <see langword="false"/>.</returns>
         protected bool TryAddDbInfo(SQLiteDbConnection connection, string dbVersion, CancellationToken cancellationToken)
         {
             connection.ExecuteNonQuery(CreateVersionTable, cancellationToken: cancellationToken);
@@ -128,7 +128,7 @@ END;
         /// </summary>
         /// <param name="connection">The database connection to use for performing the update.</param>
         /// <param name="cancellationToken">Cancellation token to cancel the execution.</param>
-        /// <returns><c>true</c> if the update operations were successful; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the update operations were successful; otherwise, <see langword="false"/>.</returns>
         public sealed override bool Update(SQLiteDbConnection connection, CancellationToken cancellationToken)
         {
             Debug.Assert(connection.InTransaction);
